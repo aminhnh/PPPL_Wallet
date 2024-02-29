@@ -4,15 +4,14 @@ import java.time.LocalDate;
 
 public class Card {
     private String ownerName;
-    private int accountNumber;
+    private String accountNumber;
     private String bank;
-    private LocalDate masaAktif;
 
-    public int getAccountNumber() {
+    public String getAccountNumber() {
         return accountNumber;
     }
 
-    public void setAccountNumber(int accountNumber) {
+    public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
     }
 
@@ -30,13 +29,5 @@ public class Card {
 
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
-    }
-
-    public LocalDate getMasaAktif() {
-        return masaAktif;
-    }
-
-    public void setMasaAktif(LocalDate masaAktif) {
-        this.masaAktif = masaAktif;
     }
 }
