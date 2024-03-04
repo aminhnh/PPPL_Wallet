@@ -1,71 +1,77 @@
 package org.example;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class WalletTest {
+    private Wallet wallet;
     private final String ownerName = "Kenshi Yonezu";
     private final String bankName = "Mandiri";
     private final String cardAccountNumber = "1234-5678-9012";
-
+    @BeforeAll
+    void initClass() {
+        wallet = new Wallet(ownerName);
+        System.out.println("@BeforeAll is called");
+    }
+    @BeforeEach
+    void initMethod() {
+        wallet.setOwnerName(ownerName);
+        wallet.addCard(bankName, cardAccountNumber);
+        System.out.println("@BeforeEach is called");
+    }
+    @AfterEach
+    void cleanMethod() {
+        wallet.removeAllCards();
+        System.out.println("@AfterEach is called");
+    }
+    @AfterAll
+    void cleanClass() {
+        System.out.println("@AfterAll is called");
+    }
     @Test
     public void testSetDataOwner() {
-        // Arrange
-        Wallet wallet = new Wallet(ownerName);
-        // Act & Assert
-        assertOwnerNameNotNull(wallet);
-        assertEquals(ownerName, wallet.getOwnerName());
-
-        // Test setting new owner name
-        String newOwnerName = "Himalaya";
-        wallet.setOwnerName(newOwnerName);
-        assertOwnerNameNotNull(wallet);
-        assertEquals(newOwnerName, wallet.getOwnerName());
-
-        // Test setting an empty owner name
+        assertAll(
+                () ->  assertNotNull(wallet.getOwnerName()),
+                () -> assertEquals(ownerName, wallet.getOwnerName())
+        );
+    }
+    @Test
+    public void testChangeOwnerName() {
+        wallet.setOwnerName("Himalaya");
+        assertAll(
+                () ->  assertNotNull(wallet.getOwnerName()),
+                () -> assertEquals("Himalaya", wallet.getOwnerName())
+        );
         wallet.setOwnerName("");
-        assertOwnerNameNotNull(wallet);
-        assertEquals("", wallet.getOwnerName());
+        assertAll(
+                () ->  assertNotNull(wallet.getOwnerName()),
+                () -> assertEquals("", wallet.getOwnerName())
+        );
     }
-    private void assertOwnerNameNotNull(Wallet wallet) {
-        assertNotNull(wallet.getOwnerName());
-    }
-
     @Test
     public void testAddCard() {
-        // Arrange
-        Wallet wallet = new Wallet(ownerName);
-
-        // Act & Assert
-        wallet.addCard(bankName, cardAccountNumber);
-        assertEquals(1, wallet.getCards().size());
+        Card addedCard = wallet.getCards().get(0);
 
         // Assert
-        Card addedCard = wallet.getCards().get(0);
-        assertEquals(ownerName, addedCard.getOwnerName());
-        assertEquals(bankName, addedCard.getBank());
-        assertEquals(cardAccountNumber, addedCard.getAccountNumber());
+        assertAll(
+                () -> assertEquals(1, wallet.getCards().size()),
+                () -> assertEquals(ownerName, addedCard.getOwnerName()),
+                () -> assertEquals(bankName, addedCard.getBank()),
+                () -> assertEquals(cardAccountNumber, addedCard.getAccountNumber())
+        );
     }
-
     @Test
     public void testRemoveCard() {
-        // Arrange
-        Wallet wallet = new Wallet(ownerName);
-
-        // Add a card to the wallet
-        Card cardToRemove = new Card();
-        cardToRemove.setOwnerName(ownerName);
-        cardToRemove.setBank(bankName);
-        cardToRemove.setAccountNumber(cardAccountNumber);
-        wallet.getCards().add(cardToRemove);
-
         // Act
         wallet.removeCard(cardAccountNumber);
 
         // Assert
-        assertEquals(0, wallet.getCards().size());
-        assertNull(findCardByAccountNumber(wallet, cardAccountNumber));
+        assertAll(
+                () -> assertEquals(0, wallet.getCards().size()),
+                () -> assertNull(findCardByAccountNumber(wallet, cardAccountNumber))
+        );
     }
     private Card findCardByAccountNumber(Wallet wallet, String accountNumber) {
         for (Card card : wallet.getCards()) {
@@ -78,9 +84,6 @@ class WalletTest {
 
     @Test
     public void testDeposit() {
-        // Arrange
-        Wallet wallet = new Wallet(ownerName);
-
         // Act & Assert: Deposit a valid amount
         int validAmount = 5000;
         int depositedAmount = wallet.depositCash(validAmount);
@@ -110,8 +113,6 @@ class WalletTest {
 
     @Test
     public void testWithdrawCash() {
-        // Arrange
-        Wallet wallet = new Wallet(ownerName);
         int validAmount = 1000;
         wallet.depositCash(validAmount);
 
@@ -152,8 +153,6 @@ class WalletTest {
 
     @Test
     public void testCalculateTotalCash() {
-        // Arrange
-        Wallet wallet = new Wallet(ownerName);
         Integer amount1 = 10000;
         wallet.depositCash(amount1);
 
@@ -167,6 +166,6 @@ class WalletTest {
         wallet.depositCash(amount2);
         wallet.depositCash(amount3);
         wallet.depositCash(amount4);
-        assertEquals(amount1+amount2+amount3+amount4, wallet.calculateTotalCash());
+        assertEquals(31100, wallet.calculateTotalCash());
     }
 }

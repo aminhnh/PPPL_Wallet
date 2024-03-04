@@ -62,7 +62,9 @@ public class Wallet {
         }
 
     }
-
+    public void removeAllCards() {
+        cards.clear();
+    }
     public Integer depositCash(Integer amount) {
         if (amount <= 0) {
             System.out.println("Invalid deposit amount. Amount must be greater than zero.");
