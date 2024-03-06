@@ -10,26 +10,27 @@ class WalletTest {
     private final String ownerName = "Kenshi Yonezu";
     private final String bankName = "Mandiri";
     private final String cardAccountNumber = "1234-5678-9012";
+
     @BeforeAll
     void initClass() {
-        wallet = new Wallet(ownerName);
         System.out.println("@BeforeAll is called");
     }
     @BeforeEach
     void initMethod() {
-        wallet.setOwnerName(ownerName);
+        wallet = new Wallet(ownerName);
         wallet.addCard(bankName, cardAccountNumber);
         System.out.println("@BeforeEach is called");
     }
     @AfterEach
     void cleanMethod() {
-        wallet.removeAllCards();
+        wallet = null;
         System.out.println("@AfterEach is called");
     }
     @AfterAll
     void cleanClass() {
         System.out.println("@AfterAll is called");
     }
+
     @Test
     public void testSetDataOwner() {
         assertAll(
