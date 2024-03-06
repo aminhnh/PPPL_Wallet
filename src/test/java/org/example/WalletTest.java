@@ -54,8 +54,6 @@ class WalletTest {
     @Test
     public void testAddCard() {
         Card addedCard = wallet.getCards().get(0);
-
-        // Assert
         assertAll(
                 () -> assertEquals(1, wallet.getCards().size()),
                 () -> assertEquals(ownerName, addedCard.getOwnerName()),
@@ -65,10 +63,7 @@ class WalletTest {
     }
     @Test
     public void testRemoveCard() {
-        // Act
         wallet.removeCard(cardAccountNumber);
-
-        // Assert
         assertAll(
                 () -> assertEquals(0, wallet.getCards().size()),
                 () -> assertNull(findCardByAccountNumber(wallet, cardAccountNumber))
@@ -82,91 +77,76 @@ class WalletTest {
         }
         return null;
     }
-
     @Test
-    public void testDeposit() {
-        // Act & Assert: Deposit a valid amount
-        int validAmount = 5000;
-        int depositedAmount = wallet.depositCash(validAmount);
-
-        assertEquals(validAmount, depositedAmount);
-        assertEquals(1, wallet.getCashMap().get(validAmount).intValue());
-        System.out.println("Current Cash Map: " + wallet.getCashMap());
-
-
-        // Act & Assert: Deposit an invalid amount
-        int invalidAmount = 0;
-        depositedAmount = wallet.depositCash(invalidAmount);
-
-        assertEquals(0, depositedAmount);
-        assertNull(wallet.getCashMap().get(invalidAmount));
-        System.out.println("Current Cash Map: " + wallet.getCashMap());
-
-
-        // Act & Assert: Deposit using an invalid denomination
-        int invalidDenomination = 3000;
-        depositedAmount = wallet.depositCash(invalidDenomination);
-
-        assertEquals(0, depositedAmount);
-        assertNull(wallet.getCashMap().get(invalidDenomination));
-        System.out.println("Current Cash Map: " + wallet.getCashMap());
+    void testDepositValidPositiveAmount() {
+        int positiveAmount = 5000;
+        assertAll(
+                () -> assertEquals(positiveAmount, wallet.depositCash(positiveAmount)),
+                () -> assertEquals(1, wallet.getCashMap().get(positiveAmount).intValue())
+        );
     }
-
     @Test
-    public void testWithdrawCash() {
-        int validAmount = 1000;
-        wallet.depositCash(validAmount);
-
-        // Act & Assert: Withdraw a valid amount
-        int withdrawnAmount = wallet.withdrawCash(validAmount);
-
-        assertEquals(validAmount, withdrawnAmount);
-        assertEquals(0, wallet.getCashMap().get(validAmount).intValue());
-        System.out.println("1 - Current Cash Map: " + wallet.getCashMap());
-
-
-        // Act & Assert: Withdraw an invalid amount
-        int invalidAmount = 0;
-        withdrawnAmount = wallet.withdrawCash(invalidAmount);
-
-        assertEquals(0, withdrawnAmount);
-        assertNull(wallet.getCashMap().get(invalidAmount));
-        System.out.println("2 - Current Cash Map: " + wallet.getCashMap());
-
-
-        // Act & Assert: Withdraw using an invalid denomination
-        int invalidDenomination = 3000;
-        withdrawnAmount = wallet.withdrawCash(invalidDenomination);
-
-        assertEquals(0, withdrawnAmount);
-        assertNull(wallet.getCashMap().get(invalidDenomination));
-        System.out.println("3 - Current Cash Map: " + wallet.getCashMap());
-
-
-        // Act & Assert: Withdraw from a valid but empty denomination
-        int emptyDenomination = 100000;
-        withdrawnAmount = wallet.withdrawCash(emptyDenomination);
-
-        assertEquals(0, withdrawnAmount);
-        assertNotNull(wallet.getCashMap().get(emptyDenomination));
-        System.out.println("4 - Current Cash Map: " + wallet.getCashMap());
+    void testDepositNegativeAmount() {
+        int negativeAmount = -1000;
+        assertAll(
+                () -> assertEquals(0, wallet.depositCash(negativeAmount))
+        );
     }
-
     @Test
-    public void testCalculateTotalCash() {
-        Integer amount1 = 10000;
-        wallet.depositCash(amount1);
+    void testDepositZeroAmount() {
+        int zeroAmount = 0;
+        assertAll(
+                () -> assertEquals(0, wallet.depositCash(zeroAmount))
+        );
+    }
+    @Test
+    void testDepositInvalidDenomination() {
+        int invalidDenomination = 13000;
+        assertAll(
+                () -> assertEquals(0, wallet.depositCash(invalidDenomination))
+        );
+    }
+    @Test
+    void testWithdrawValidPositiveAmount() {
+        int positiveAmount = 2000;
+        wallet.depositCash(positiveAmount);
+        assertAll(
+                () -> assertEquals(positiveAmount, wallet.withdrawCash(positiveAmount)),
+                () -> assertEquals(0, wallet.getCashMap().get(positiveAmount).intValue())
+        );
+    }
+    @Test
+    void testWithdrawNegativeAmount() {
+        int negativeAmount = -1000;
+        assertAll(
+                () -> assertEquals(0, wallet.withdrawCash(negativeAmount)),
+                () -> assertNull(wallet.getCashMap().get(negativeAmount))
+        );
+    }
+    @Test
+    void testWithdrawZeroAmount() {
+        int zeroAmount = 0;
+        assertAll(
+                () -> assertEquals(0, wallet.withdrawCash(zeroAmount)),
+                () -> assertNull(wallet.getCashMap().get(zeroAmount))
+        );
+    }
+    @Test
+    void testWithdrawUnavailableAmount() {
+        int unavailableAmount = 100000;
+        assertEquals(0, wallet.withdrawCash(unavailableAmount));
+    }
+    @Test
+    void testWithdrawInvalidDenomination() {
+        int invalidDenomination = 13000;
+        assertEquals(0, wallet.withdrawCash(invalidDenomination));
+    }
+    @Test
+    void testCalculateTotalCash() {
+        wallet.depositCash(100);
+        wallet.depositCash(500);
+        wallet.depositCash(1000);
 
-        // Assert
-        assertEquals(amount1, wallet.calculateTotalCash());
-
-        // Act & Assert: Sum multiple cash
-        Integer amount2 = 20000;
-        Integer amount3 = 1000;
-        Integer amount4 = 100;
-        wallet.depositCash(amount2);
-        wallet.depositCash(amount3);
-        wallet.depositCash(amount4);
-        assertEquals(31100, wallet.calculateTotalCash());
+        assertEquals(1600, wallet.calculateTotalCash());
     }
 }
